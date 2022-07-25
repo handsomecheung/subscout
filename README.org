@@ -1,0 +1,23 @@
+#+TITLE: Readme
+
+
+* nltk
+nltk: Natural Language Toolkit
+https://www.nltk.org/
+** install
+pip install --user -U nltk
+pip install --user -U numpy
+
+import nltk
+
+#+begin_src python
+import nltk
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
+nltk.download('words')
+#+end_src
+
+* PyEnchant
+https://pyenchant.github.io/pyenchant/tutorial.html
+pip install --user -U pyenchant
+apt install enchant-2
