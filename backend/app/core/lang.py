@@ -1,14 +1,9 @@
 #!/usr/bin/env python3
 
 import re
-import shutil
-import subprocess
-
 import nltk
 import enchant
 import fugashi
-
-import common
 
 LANGUAGE = {
     "en": "en",
@@ -88,23 +83,11 @@ class Japanese(Language):
         self.name = LANGUAGE["jp"]
         self.tagger = fugashi.Tagger("-Owakati")
 
-    def get_tokens_auto(self) -> list:
-        for word in self.tagger(self.content):
-            token = str(word)
-            if is_japanese(token):
-                yield token
-
-    def get_tokens_manually(self) -> list:
-        file_content = common.get_cache_file(self.name, f"{self.subtitle_path.stem}.content")
-        with open(file_content, "w") as f:
-            f.write(self.content)
-
-        file_token = common.get_cache_file(self.name, f"{self.subtitle_path.stem}.token")
-        shutil.copy(file_content, file_token)
-        subprocess.Popen(("emacs", "-nw", file_token)).wait()
-
-        with open(file_token, "r") as f:
-            return [line.strip() for line in f.readlines()]
+    def is_word(self, token):
+        return is_japanese(token)
 
     def get_tokens(self) -> list:
-        return self.get_tokens_manually()
+        for word in self.tagger(self.content):
+            token = str(word)
+            if self.is_word(token):
+                yield token

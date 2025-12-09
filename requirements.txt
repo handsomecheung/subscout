@@ -1,6 +1,0 @@
-pyenchant
-nltk
-numpy
-docopt
-ass
-fugashi
