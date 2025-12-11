@@ -4,6 +4,8 @@ import re
 import nltk
 import enchant
 import fugashi
+from nltk.stem import WordNetLemmatizer
+from nltk.corpus import wordnet
 
 LANGUAGE = {
     "en": "en",
@@ -61,19 +63,39 @@ class English(Language):
         self.name = LANGUAGE["en"]
         self.re_word = re.compile(r"[a-zA-Z]")
         self.enchant_dict = enchant.Dict("en_US")
+        self.lemmatizer = WordNetLemmatizer()
 
     def is_word(self, token):
         return len(token) > 1 and self.enchant_dict.check(token) and self.re_word.match(token)
 
+    def _get_wordnet_pos(self, tag):
+        """Map POS tag to first character lemmatize() accepts"""
+        if tag.startswith("J"):
+            return wordnet.ADJ
+        elif tag.startswith("V"):
+            return wordnet.VERB
+        elif tag.startswith("N"):
+            return wordnet.NOUN
+        elif tag.startswith("R"):
+            return wordnet.ADV
+        else:
+            return wordnet.NOUN
+
     def get_tokens(self) -> list:
-        for token in nltk.tokenize.word_tokenize(self.content):
+        tokens = nltk.tokenize.word_tokenize(self.content)
+        tagged_tokens = nltk.pos_tag(tokens)
+
+        for token, tag in tagged_tokens:
             if token.endswith(".") and token.count(".") == 1:
                 token = token.replace(".", "")
 
-            if not self.is_word(token):
+            wordnet_pos = self._get_wordnet_pos(tag)
+            lemma = self.lemmatizer.lemmatize(token.lower(), pos=wordnet_pos)
+
+            if not self.is_word(lemma):
                 continue
 
-            yield token.lower()
+            yield lemma
 
 
 class Japanese(Language):
